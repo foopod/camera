@@ -1,0 +1,245 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera</title>
+    <style>
+        #settings {
+            display: flex;
+            justify-content: space-evenly;
+        }
+        .box{
+            /* width:33%; */
+        }
+
+        select:disabled {
+            color: #111;
+            background-color: white;
+            border: 1px solid grey;
+            border-radius: 3px;
+            width: 80px;
+            text-align: center;
+            padding: 0.5em
+        }
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            text-indent: 1px;
+            text-overflow: '';
+        }
+        #tip{
+            text-align: center;
+        }
+
+        #mode-select{
+            display: block;
+            /* max-width: 22em; */
+            margin: auto;
+            width: max-content;
+        }
+        .title{
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <img src="example.jpg" style="width:200px;display: block;margin:auto" id="example">
+    <br>
+
+    <div id="mode-select">
+        <p class="title">Mode</p>
+        <input type="radio" id="manual" name="mode" value="manual" checked onclick="setManual()">
+        <label for="manual">manual</label><br>
+        <input type="radio" id="tv" name="mode" value="tv" onclick="setShutterPriority()">
+        <label for="tv">Tv (shutter priority)</label><br>
+        <input type="radio" id="av" name="mode" value="av" onclick="setAperturePriority()">
+        <label for="av">Av (aperture priority)</label>
+    </div>
+
+    <div id="settings">
+        <div class="box">
+            <p class="title">Aperture</p>
+            <a href="#" onclick="changeAperture(-1)" id="apertureDown"><</a>
+            <select id="aperture" disabled>
+                <option>2</option>
+                <option>2.8</option>
+                <option>4</option>
+                <option>5.6</option>
+                <option>8</option>
+                <option>11</option>
+                <option>16</option>
+            </select>
+            <a href="#" onclick="changeAperture(1)"  id="apertureUp">></a>
+        </div>
+
+        <div class="box">
+            <p class="title">Shutter Speed</p>
+            <a href="#" onclick="changeShutter(-1)" id="shutterDown"><</a>
+            <select id="shutter" disabled>
+                <option>1</option>
+                <option>2</option>
+                <option>4</option>
+                <option>8</option>
+                <option>15</option>
+                <option>30</option>
+                <option>60</option>
+                <option>125</option>
+                <option>250</option>
+                <option>500</option>
+                <option>1000</option>
+            </select>
+            <a href="#" onclick="changeShutter(1)" id="shutterUp">></a>
+        </div>
+
+        <div class="box">
+            <p class="title">ISO</p>
+            <a href="#" onclick="changeISO(-1)" id="isoDown"><</a>
+            <select id = "iso" disabled>
+                <option>100</option>
+                <option>200</option>
+                <option>400</option>
+                <option>800</option>
+                <option>1600</option>
+                <option>3200</option>
+                <option>6400</option>
+            </select>
+            <a href="#" onclick="changeISO(1)" id="isoUp">></a>
+        </div>
+    </div>
+
+    <p id="tip"></p>
+
+    <script>
+        var brightness = 1;
+        var mode = "manual"
+
+        function setup(){
+            document.querySelector('#aperture').getElementsByTagName('option')[4].selected = 'selected'
+            document.querySelector('#shutter').getElementsByTagName('option')[7].selected = 'selected'
+            document.querySelector('#iso').getElementsByTagName('option')[0].selected = 'selected'
+
+            setTip("")
+            brightness = 1;
+            changeBrightness(brightness)
+        }
+
+        function changeAperture( value){
+            if(value < 0 && document.querySelector('#aperture').selectedIndex == 0){
+
+            } else if( value > 0 && document.querySelector('#aperture').selectedIndex ==document.querySelector('#aperture').getElementsByTagName('option').length - 1 ){
+
+            } else {
+                document.querySelector('#aperture').selectedIndex += value
+
+                brightness -= value/5
+                changeBrightness(brightness)
+                if(mode == "av"){
+                    if(value > 0){
+                        changeShutter(-1)
+                        setTip("As you widen the aperture, the shutter speed increases to balance the exposure.")
+                    } else {
+                        changeShutter(1)
+                        setTip("As you narrow the aperture, the shutter speed decreases to balance the exposure.")
+                    }
+                }
+            }
+
+            
+        }
+
+        function changeShutter( value){
+            if(value < 0 && document.querySelector('#shutter').selectedIndex == 0){
+
+            } else if( value > 0 && document.querySelector('#shutter').selectedIndex ==document.querySelector('#shutter').getElementsByTagName('option').length - 1 ){
+
+            } else {
+                document.querySelector('#shutter').selectedIndex += value
+
+                brightness -= value/5
+                changeBrightness(brightness)
+
+                if(mode == "tv"){
+                    if(value > 0){
+                        changeAperture(-1)
+                        setTip("As you increase the shutter speed, the aperture becomes more narrow to balance the exposure.")
+                    } else {
+                        changeAperture(1)
+                        setTip("As you decrease the shutter speed, the aperture widens to balance the exposure.")
+                    }
+                    
+                }
+            }
+        }
+
+        function changeISO( value){
+            if(value < 0 && document.querySelector('#iso').selectedIndex == 0){
+
+            } else if( value > 0 && document.querySelector('#iso').selectedIndex ==document.querySelector('#iso').getElementsByTagName('option').length - 1 ){
+
+            } else {
+
+                document.querySelector('#iso').selectedIndex += value
+                brightness += value/5
+                changeBrightness(brightness)
+            }
+        }
+
+        function changeBrightness(value){
+            document.getElementById("example").style.filter = `brightness(${value})`
+        }
+
+        function setShutterPriority(){
+            setup();
+            able("aperture", false)
+            able("shutter", true)
+            able("iso", false)
+            mode = "tv"
+            setTip("The aperture will now change automatically to compensate the change in shutter speed")
+        }
+
+        function setAperturePriority(){
+            setup();
+            able("aperture", true)
+            able("shutter", false)
+            able("iso", false)
+            mode = "av"
+            setTip("The shutter speed will now change automatically to compensate the change in aperture")
+        }
+
+        function setManual(){
+            setup();
+            able("aperture", true)
+            able("shutter", true)
+            able("iso", true)
+            mode = "manual"
+        }
+
+        function setTip(value){
+            document.getElementById("tip").innerText = value;
+        }
+
+        function able(select, isAble){
+            if(isAble){
+                document.getElementById(select).style.backgroundColor = "white"
+                document.getElementById(`${select}Up`).style.display = "inline";
+                document.getElementById(`${select}Down`).style.display = "inline";
+            } else {
+                document.getElementById(select).style.backgroundColor = "gainsboro"
+                document.getElementById(`${select}Up`).style.display = "none";
+                document.getElementById(`${select}Down`).style.display = "none";
+            }
+
+        }
+
+        window.onload = function() {
+            setup();
+        };
+
+    </script>
+</body>
+
+</html>
